@@ -78,11 +78,16 @@ daft_net.add_edge("calcification", "calcification_density")
 daft_net.add_edge("calcification", "calcification_arrangement")
 daft_net.add_edge("calcification", "calcification_size")
 
+pgmpy_net = BayesianNetwork(
+    [(edge.node1.name, edge.node2.name) for edge in daft_net._edges]
+)
+
 mammonet_system = utils.true_system_bayes_network(
     system_name="MammoNet",
     system_source="[paper] Construction of a Bayesian Network for Mammographic Diagnosis of Breast Cancer Kahn Jr et al. (1996)",
     can_control_varnames=[],
     daft_model=daft_net,
+    pgmpy_bayes_network_model=pgmpy_net,
 )
 
 if __name__ == "__main__":
