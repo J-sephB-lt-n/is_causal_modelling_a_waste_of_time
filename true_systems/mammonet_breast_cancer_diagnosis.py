@@ -9,6 +9,7 @@ from pgmpy.models.BayesianModel import BayesianNetwork
 from pgmpy.factors.discrete import (
     TabularCPD,
 )  # discrete Conditional Probability Distribution
+import numpy as np
 
 if __name__ == "__main__":
     # allow visibility of parent directory
@@ -81,6 +82,47 @@ daft_net.add_edge("calcification", "calcification_size")
 pgmpy_net = BayesianNetwork(
     [(edge.node1.name, edge.node2.name) for edge in daft_net._edges]
 )
+cpd_dict = {
+    "age": TabularCPD(
+        variable="age",
+        variable_card=2,
+        values=[[i] for i in np.random.dirichlet(alpha=np.ones(2), size=1)[0]],
+    ),
+    "num_relatives": TabularCPD(
+        variable="num_relatives",
+        variable_card=2,
+        values=[[i] for i in np.random.dirichlet(alpha=np.ones(2), size=1)[0]],
+    ),
+    "age_at_1st_live_birth": TabularCPD(
+        variable="age_at_1st_live_birth",
+        variable_card=2,
+        values=[[i] for i in np.random.dirichlet(alpha=np.ones(2), size=1)[0]],
+    ),
+    "age_at_menarche": TabularCPD(
+        variable="age_at_menarche",
+        variable_card=2,
+        values=[[i] for i in np.random.dirichlet(alpha=np.ones(2), size=1)[0]],
+    ),
+    "previous_biopsy": TabularCPD(
+        variable="previous_biopsy",
+        variable_card=2,
+        values=[[i] for i in np.random.dirichlet(alpha=np.ones(2), size=1)[0]],
+    ),
+    "pain": TabularCPD(
+        #  pain             | 0 | 1 |
+        #  -----------------|---|---|
+        #  breast_cancer=0  | x | x |
+        #  breast_cancer=1  | x | x |
+        # (columns sum to 1.0)
+        variable="pain",
+        variable_card=2,
+        evidence=["cancer"],
+        evidence_card=[2],
+        values=np.random.dirichlet(alpha=np.ones(2), size=2).transpose().tolist(),
+    ),
+}
+
+# assert pgmpy_net.check_model(), "pgmpy model incorrectly specified"
 
 mammonet_system = utils.true_system_bayes_network(
     system_name="MammoNet",
@@ -88,6 +130,8 @@ mammonet_system = utils.true_system_bayes_network(
     can_control_varnames=[],
     daft_model=daft_net,
     pgmpy_bayes_network_model=pgmpy_net,
+    model_train_data=[],
+    model_test_data=[],
 )
 
 if __name__ == "__main__":
