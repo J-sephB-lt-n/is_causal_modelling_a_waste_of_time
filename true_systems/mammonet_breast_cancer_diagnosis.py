@@ -85,40 +85,179 @@ pgmpy_net = BayesianNetwork(
 cpd_dict = {
     "age": TabularCPD(
         variable="age",
-        variable_card=2,
-        values=[[i] for i in np.random.dirichlet(alpha=np.ones(2), size=1)[0]],
+        variable_card=3,
+        values=[[i] for i in np.random.dirichlet(alpha=np.ones(3) * 2, size=1)[0]],
+        state_names={"age": ["young", "middle", "old"]},
     ),
     "num_relatives": TabularCPD(
         variable="num_relatives",
-        variable_card=2,
-        values=[[i] for i in np.random.dirichlet(alpha=np.ones(2), size=1)[0]],
+        variable_card=3,
+        values=[[i] for i in np.random.dirichlet(alpha=np.ones(3) * 2, size=1)[0]],
+        state_names={"num_relatives": ["none", "some", "many"]},
     ),
     "age_at_1st_live_birth": TabularCPD(
         variable="age_at_1st_live_birth",
-        variable_card=2,
-        values=[[i] for i in np.random.dirichlet(alpha=np.ones(2), size=1)[0]],
+        variable_card=3,
+        values=[[i] for i in np.random.dirichlet(alpha=np.ones(3) * 2, size=1)[0]],
+        state_names={"age_at_1st_live_birth": ["young", "middle", "old"]},
     ),
     "age_at_menarche": TabularCPD(
         variable="age_at_menarche",
-        variable_card=2,
-        values=[[i] for i in np.random.dirichlet(alpha=np.ones(2), size=1)[0]],
+        variable_card=3,
+        values=[[i] for i in np.random.dirichlet(alpha=np.ones(3) * 2, size=1)[0]],
+        state_names={"age_at_menarche": ["young", "middle", "old"]},
     ),
     "previous_biopsy": TabularCPD(
         variable="previous_biopsy",
         variable_card=2,
-        values=[[i] for i in np.random.dirichlet(alpha=np.ones(2), size=1)[0]],
+        values=[[i] for i in np.random.dirichlet(alpha=np.ones(2) * 2, size=1)[0]],
+        state_names={"previous_biopsy": ["no", "yes"]},
     ),
     "pain": TabularCPD(
-        #  pain             | 0 | 1 |
-        #  -----------------|---|---|
-        #  breast_cancer=0  | x | x |
-        #  breast_cancer=1  | x | x |
+        #  breast_cancer | no | yes |
+        #  --------------|----|-----|
+        #  pain=no       | x  |  x  |
+        #  pain=yes      | x  |  x  |
         # (columns sum to 1.0)
         variable="pain",
         variable_card=2,
-        evidence=["cancer"],
+        evidence=["breast_cancer"],
         evidence_card=[2],
-        values=np.random.dirichlet(alpha=np.ones(2), size=2).transpose().tolist(),
+        values=np.random.dirichlet(alpha=np.ones(2) * 2, size=2).transpose().tolist(),
+        state_names={
+            "breast_cancer": ["no", "yes"],
+            "pain": ["no", "yes"],
+        },
+    ),
+    "nipple_discharge": TabularCPD(
+        #  breast_cancer        | no | yes |
+        #  ---------------------|---|---|
+        #  nipple_discharge=no  | x | x |
+        #  nipple_discharge=yes | x | x |
+        # (columns sum to 1.0)
+        variable="nipple_discharge",
+        variable_card=2,
+        evidence=["breast_cancer"],
+        evidence_card=[2],
+        values=np.random.dirichlet(alpha=np.ones(2) * 2, size=2).transpose().tolist(),
+        state_names={
+            "nipple_discharge": ["no", "yes"],
+            "breast_cancer": ["no", "yes"],
+        },
+    ),
+    "asymmetry": TabularCPD(
+        #  breast_cancer  | no | yes |
+        #  ---------------|----|-----|
+        #  asymmetry=no   | x  |  x  |
+        #  asymmetry=yes  | x  |  x  |
+        # (columns sum to 1.0)
+        variable="asymmetry",
+        variable_card=2,
+        evidence=["breast_cancer"],
+        evidence_card=[2],
+        values=np.random.dirichlet(alpha=np.ones(2) * 2, size=2).transpose().tolist(),
+        state_names={
+            "asymmetry": ["no", "yes"],
+            "breast_cancer": ["no", "yes"],
+        },
+    ),
+    "developing_density": TabularCPD(
+        #  breast_cancer           | no | yes |
+        #  ------------------------|----|-----|
+        #  developing_density=low  | x  |  x  |
+        #  developing_density=med  | x  |  x  |
+        #  developing_density=high | x  |  x  |
+        # (columns sum to 1.0)
+        variable="developing_density",
+        variable_card=3,
+        evidence=["breast_cancer"],
+        evidence_card=[2],
+        values=np.random.dirichlet(alpha=np.ones(3) * 2, size=2).transpose().tolist(),
+        state_names={
+            "developing_density": ["low", "med", "high"],
+            "breast_cancer": ["no", "yes"],
+        },
+    ),
+    "architectural_distortion": TabularCPD(
+        # previous_biopsy               | no       | yes      |
+        # breast_cancer                 | no | yes | no | yes |
+        # ------------------------------|----|-----|----|-----|
+        # architectural_distortion=low  | x  |  x  | x  |  x  |
+        # architectural_distortion=med  | x  |  x  | x  |  x  |
+        # architectural_distortion=high | x  |  x  | x  |  x  |
+        # (columns sum to 1.0)
+        variable="architectural_distortion",
+        variable_card=3,
+        evidence=["previous_biopsy", "breast_cancer"],
+        evidence_card=[2, 2],
+        values=np.random.dirichlet(alpha=np.ones(3) * 2, size=4).transpose().tolist(),
+        state_names={
+            "architectural_distortion": ["low", "med", "high"],
+            "previous_biopsy": ["no", "yes"],
+            "breast_cancer": ["no", "yes"],
+        },
+    ),
+    "mass": TabularCPD(
+        #  breast_cancer | no | yes |
+        #  --------------|----|-----|
+        #  mass=low      | x  |  x  |
+        #  mass=med      | x  |  x  |
+        #  mass=high     | x  |  x  |
+        # (columns sum to 1.0)
+        variable="mass",
+        variable_card=3,
+        evidence=["breast_cancer"],
+        evidence_card=[2],
+        values=np.random.dirichlet(alpha=np.ones(3) * 2, size=2).transpose().tolist(),
+        state_names={
+            "mass": ["low", "med", "high"],
+            "breast_cancer": ["no", "yes"],
+        },
+    ),
+    "mass_present": TabularCPD(
+        #  mass             | low | med | high |
+        #  -----------------|-----|-----|------|
+        #  mass_present=no  | x   |  x  |  x   |
+        #  mass_present=yes | x   |  x  |  x   |
+        # (columns sum to 1.0)
+        variable="mass_present",
+        variable_card=2,
+        evidence=["mass"],
+        evidence_card=[3],
+        values=np.random.dirichlet(alpha=np.ones(2) * 2, size=3).transpose().tolist(),
+        state_names={"mass": ["low", "med", "high"], "mass_present": ["no", "yes"]},
+    ),
+    "calcification": TabularCPD(
+        #  breast_cancer     | no | yes |
+        #  ------------------|----|-----|
+        #  calcification=no  | x  |  x  |
+        #  calcification=yes | x  |  x  |
+        # (columns sum to 1.0)
+        variable="calcification",
+        variable_card=2,
+        evidence=["breast_cancer"],
+        evidence_card=[2],
+        values=np.random.dirichlet(alpha=np.ones(2) * 2, size=2).transpose().tolist(),
+        state_names={
+            "calcification": ["no", "yes"],
+            "breast_cancer": ["no", "yes"],
+        },
+    ),
+    "calcification_present": TabularCPD(
+        # calcification             | no | yes |
+        # --------------------------|----|-----|
+        # calcification_present=no  | x  |  x  |
+        # calcification_present=yes | x  |  x  |
+        # (columns sum to 1.0)
+        variable="calcification_present",
+        variable_card=2,
+        evidence=["calcification"],
+        evidence_card=[2],
+        values=np.random.dirichlet(alpha=np.ones(2) * 2, size=2).transpose().tolist(),
+        state_names={
+            "calcification": ["no", "yes"],
+            "calcification_present": ["no", "yes"],
+        },
     ),
 }
 
@@ -135,4 +274,9 @@ mammonet_system = utils.true_system_bayes_network(
 )
 
 if __name__ == "__main__":
-    daft_net.render()
+    daft_net.render(dpi=60)
+
+    # overwrite the string truncation method in TabularCPD class to print full CPDs:
+    TabularCPD._truncate_strtable = lambda self, x: x
+    for x_name in cpd_dict:
+        print(cpd_dict[x_name])
